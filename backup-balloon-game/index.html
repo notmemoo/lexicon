@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#ff9a9e">
+
+    <!-- SEO & Link Previews -->
+    <title>Balloon Pop Adventure - Pop Colorful Balloons!</title>
+    <meta name="description"
+        content="Pop colorful balloons in this fun arcade game! Multiple modes, special power-ups, and endless fun. Play now!">
+
+    <!-- Open Graph (Facebook, Discord, LinkedIn) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Balloon Pop Adventure 🎈">
+    <meta property="og:description"
+        content="Pop colorful balloons in this fun arcade game! Multiple modes, special power-ups, and endless fun. Play now!">
+    <meta property="og:image" content="https://balloonpopadventure.vercel.app/preview.png">
+    <meta property="og:url" content="https://balloonpopadventure.vercel.app/">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Balloon Pop Adventure 🎈">
+    <meta name="twitter:description"
+        content="Pop colorful balloons in this fun arcade game! Multiple modes and power-ups!">
+    <meta name="twitter:image" content="https://balloonpopadventure.vercel.app/preview.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+</head>
+
+<body>
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+
+        <div id="ui-overlay">
+            <!-- Top Bar -->
+            <div id="top-bar">
+                <div id="score-container" class="bubbly-text">
+                    ⭐ <span id="score-value">0</span>
+                </div>
+                <div id="coins-container" class="bubbly-text">
+                    🪙 <span id="coins-value">0</span>
+                </div>
+                <div id="timer-container" class="bubbly-text">
+                    ⏱️ <span id="timer-value">1:30</span>
+                </div>
+                <div id="lives-container" class="bubbly-text hidden">
+                    ❤️ <span id="lives-value">3</span>
+                </div>
+                <div id="boss-indicator" class="bubbly-text hidden">
+                    👹 <span id="boss-name">BOSS</span>
+                </div>
+                <button id="music-toggle" class="icon-button" aria-label="Toggle Music">🎵</button>
+                <button id="pause-button" class="icon-button" aria-label="Pause">⏸️</button>
+            </div>
+
+            <!-- Combo Display -->
+            <div id="combo-display" class="hidden">
+                <span id="combo-count">2x</span> COMBO!
+            </div>
+
+            <!-- Chain Combo Display -->
+            <div id="chain-display" class="hidden">
+                <span id="chain-count">3</span>x CHAIN! 🔗
+            </div>
+
+            <!-- Effect Messages -->
+            <div id="effect-message" class="hidden bubbly-text"></div>
+
+            <!-- Power-up Buttons (during gameplay) -->
+            <div id="powerup-bar" class="hidden">
+                <button class="powerup-btn" data-powerup="magnet" title="Magnet">
+                    🧲<span class="powerup-count" id="powerup-magnet-count">0</span>
+                </button>
+                <button class="powerup-btn" data-powerup="doubleScore" title="2x Score">
+                    2️⃣<span class="powerup-count" id="powerup-doubleScore-count">0</span>
+                </button>
+                <button class="powerup-btn" data-powerup="shield" title="Shield">
+                    🛡️<span class="powerup-count" id="powerup-shield-count">0</span>
+                </button>
+                <button class="powerup-btn" data-powerup="slowmo" title="Slow-Mo">
+                    ⏱️<span class="powerup-count" id="powerup-slowmo-count">0</span>
+                </button>
+                <button class="powerup-btn" data-powerup="autoPopBonus" title="Auto-Pop">
+                    🎯<span class="powerup-count" id="powerup-autoPopBonus-count">0</span>
+                </button>
+                <button class="powerup-btn" data-powerup="coinMagnet" title="Coin Magnet">
+                    💰<span class="powerup-count" id="powerup-coinMagnet-count">0</span>
+                </button>
+            </div>
+
+            <!-- Target Mode Indicator -->
+            <div id="target-indicator" class="hidden">
+                <span>Pop: </span>
+                <span id="target-color-display">🔴</span>
+                <span id="target-remaining">5 left</span>
+            </div>
+
+            <!-- Start Screen -->
+            <div id="start-screen" class="screen">
+                <h1 class="game-title bubbly-text">Balloon Pop<br>Adventure</h1>
+                
+                <!-- Rank Display -->
+                <div id="rank-display">
+                    <span id="rank-emoji">🎈</span>
+                    <span id="rank-name">Beginner</span>
+                    <span id="prestige-badge" class="hidden">P<span id="prestige-level">1</span></span>
+                </div>
+                
+                <div id="currency-display">
+                    <span id="total-stars"><span id="stars-amount">0</span> ⭐</span>
+                    <span id="total-coins"><span id="coins-amount">0</span> 🪙</span>
+                    <span id="total-gems" class="hidden"><span id="gems-amount">0</span> 💎</span>
+                </div>
+                
+                <div id="daily-bonus" class="hidden">
+                    <button id="claim-bonus-btn" class="bubbly-button bonus-btn">
+                        🎁 Claim Daily Bonus!
+                        <span id="streak-indicator" class="streak-mini">🔥 <span id="login-streak">0</span></span>
+                    </button>
+                </div>
+
+                <!-- Seasonal Event Banner -->
+                <div id="seasonal-banner" class="hidden">
+                    <span id="season-icon">🌸</span>
+                    <span id="season-name">Spring Bloom Event!</span>
+                </div>
+
+                <!-- Mode Selection -->
+                <div id="mode-selection">
+                    <h3>Select Mode:</h3>
+                    <div class="mode-buttons">
+                        <button class="mode-btn selected" data-mode="classic">
+                            <span class="mode-icon">🎯</span>
+                            <span class="mode-name">Classic</span>
+                            <span class="mode-desc">90 sec, avoid bombs!</span>
+                        </button>
+                        <button class="mode-btn" data-mode="zen">
+                            <span class="mode-icon">🧘</span>
+                            <span class="mode-name">Zen</span>
+                            <span class="mode-desc">No timer, no bombs</span>
+                        </button>
+                        <button class="mode-btn" data-mode="survival">
+                            <span class="mode-icon">💀</span>
+                            <span class="mode-name">Survival</span>
+                            <span class="mode-desc">3 lives, endless!</span>
+                        </button>
+                        <button class="mode-btn" data-mode="frenzy">
+                            <span class="mode-icon">⚡</span>
+                            <span class="mode-name">Frenzy</span>
+                            <span class="mode-desc">30 sec, 2x points!</span>
+                        </button>
+                        <button class="mode-btn" data-mode="target">
+                            <span class="mode-icon">🎨</span>
+                            <span class="mode-name">Target</span>
+                            <span class="mode-desc">Pop specific colors!</span>
+                        </button>
+                        <button class="mode-btn" data-mode="bossRush">
+                            <span class="mode-icon">👹</span>
+                            <span class="mode-name">Boss Rush</span>
+                            <span class="mode-desc">Fight giant bosses!</span>
+                        </button>
+                        <button class="mode-btn" data-mode="endless">
+                            <span class="mode-icon">♾️</span>
+                            <span class="mode-name">Endless</span>
+                            <span class="mode-desc">How long can you last?</span>
+                        </button>
+                        <button class="mode-btn" data-mode="puzzle">
+                            <span class="mode-icon">🧩</span>
+                            <span class="mode-name">Puzzle</span>
+                            <span class="mode-desc">Match 3+ colors!</span>
+                        </button>
+                    </div>
+                </div>
+
+                <button id="play-button" class="bubbly-button primary-btn">▶ PLAY</button>
+                
+                <div class="menu-grid">
+                    <button id="shop-button" class="menu-pill-btn">🛒 Shop</button>
+                    <button id="collection-button" class="menu-pill-btn">🎨 Cards</button>
+                    <button id="leaderboard-button" class="menu-pill-btn">🏆 Rank</button>
+                    <button id="stats-button" class="menu-pill-btn">📊 Stats</button>
+                    <button id="achievements-button" class="menu-pill-btn">🏅 Awards</button>
+                    <button id="challenges-button" class="menu-pill-btn">📋 Daily</button>
+                    <button id="weekly-button" class="menu-pill-btn">📆 Weekly</button>
+                    <button id="album-button" class="menu-pill-btn">📖 Album</button>
+                    <button id="prestige-button" class="menu-pill-btn">⭐ Prestige</button>
+                    <button id="settings-button" class="menu-pill-btn">⚙️ Settings</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tutorial Screen -->
+        <div id="tutorial-screen" class="screen hidden">
+            <div class="tutorial-container">
+                <h2 class="bubbly-text">Welcome! 🎈</h2>
+                <div id="tutorial-content">
+                    <div class="tutorial-step" data-step="0">
+                        <div class="tutorial-image">🎈</div>
+                        <p>Swipe or tap balloons to pop them!</p>
+                    </div>
+                    <div class="tutorial-step hidden" data-step="1">
+                        <div class="tutorial-image">💀</div>
+                        <p>Avoid bomb balloons - they end your game!</p>
+                    </div>
+                    <div class="tutorial-step hidden" data-step="2">
+                        <div class="tutorial-image">⚡</div>
+                        <p>Pop balloons quickly for combo bonuses!</p>
+                    </div>
+                    <div class="tutorial-step hidden" data-step="3">
+                        <div class="tutorial-image">🌈</div>
+                        <p>Look for rare balloons - they give huge rewards!</p>
+                    </div>
+                    <div class="tutorial-step hidden" data-step="4">
+                        <div class="tutorial-image">👹</div>
+                        <p>Boss balloons need multiple hits to defeat!</p>
+                    </div>
+                    <div class="tutorial-step hidden" data-step="5">
+                        <div class="tutorial-image">🎁</div>
+                        <p>Complete daily challenges for bonus coins!</p>
+                    </div>
+                </div>
+                <div class="tutorial-dots">
+                    <span class="dot active" data-step="0"></span>
+                    <span class="dot" data-step="1"></span>
+                    <span class="dot" data-step="2"></span>
+                    <span class="dot" data-step="3"></span>
+                    <span class="dot" data-step="4"></span>
+                    <span class="dot" data-step="5"></span>
+                </div>
+                <div class="tutorial-buttons">
+                    <button id="tutorial-skip" class="bubbly-button secondary-btn">Skip</button>
+                    <button id="tutorial-next" class="bubbly-button primary-btn">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Screen -->
+        <div id="settings-screen" class="screen hidden">
+            <div class="screen-header">
+                <h2 class="bubbly-text">⚙️ Settings</h2>
+                <button id="settings-back-button" class="bubbly-button secondary-btn">⬅️ Back</button>
+            </div>
+            <div class="settings-container">
+                <!-- Audio Settings -->
+                <div class="settings-section">
+                    <h3>🔊 Audio</h3>
+                    <div class="setting-row">
+                        <label>Music Volume</label>
+                        <input type="range" id="music-volume" min="0" max="100" value="50">
+                        <span id="music-volume-value">50%</span>
+                    </div>
+                    <div class="setting-row">
+                        <label>SFX Volume</label>
+                        <input type="range" id="sfx-volume" min="0" max="100" value="70">
+                        <span id="sfx-volume-value">70%</span>
+                    </div>
+                </div>
+                
+                <!-- Accessibility Settings -->
+                <div class="settings-section">
+                    <h3>♿ Accessibility</h3>
+                    <div class="setting-row">
+                        <label>Colorblind Mode</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="colorblind-mode">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-row">
+                        <label>Reduced Motion</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="reduced-motion">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-row">
+                        <label>Haptic Feedback</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="haptic-feedback" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Game Settings -->
+                <div class="settings-section">
+                    <h3>🎮 Game</h3>
+                    <div class="setting-row">
+                        <label>Show Tutorial</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="show-tutorial" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-row">
+                        <label>Auto-Save</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="auto-save" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Data Management -->
+                <div class="settings-section danger-zone">
+                    <h3>⚠️ Data</h3>
+                    <button id="reset-tutorial-btn" class="bubbly-button secondary-btn">Reset Tutorial</button>
+                    <button id="reset-progress-btn" class="bubbly-button danger-btn">Reset All Progress</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Screen -->
+        <div id="stats-screen" class="screen hidden">
+            <div class="screen-header">
+                <h2>📊 Statistics</h2>
+                <button id="stats-back-button" class="bubbly-button secondary-btn">⬅️ Back</button>
+            </div>
+            <div class="stats-container">
+                <!-- Main Stats Cards -->
+                <div class="stats-overview">
+                    <div class="stat-card gold">
+                        <div class="stat-icon">🏆</div>
+                        <div class="stat-label">High Score</div>
+                        <div class="stat-value" id="stat-high-score">0</div>
+                    </div>
+                    <div class="stat-card blue">
+                        <div class="stat-icon">🎈</div>
+                        <div class="stat-label">Total Pops</div>
+                        <div class="stat-value" id="stat-total-pops">0</div>
+                    </div>
+                    <div class="stat-card purple">
+                        <div class="stat-icon">🎮</div>
+                        <div class="stat-label">Games Played</div>
+                        <div class="stat-value" id="stat-games-played">0</div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="stat-icon">🔥</div>
+                        <div class="stat-label">Max Combo</div>
+                        <div class="stat-value" id="stat-max-combo">0</div>
+                    </div>
+                    <div class="stat-card orange">
+                        <div class="stat-icon">⏱️</div>
+                        <div class="stat-label">Play Time</div>
+                        <div class="stat-value" id="stat-play-time">0h</div>
+                    </div>
+                    <div class="stat-card pink">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-label">Avg Score</div>
+                        <div class="stat-value" id="stat-avg-score">0</div>
+                    </div>
+                </div>
+
+                <!-- Mode Stats -->
+                <div class="mode-stats-section">
+                    <h3>Mode Statistics</h3>
+                    <div id="mode-stats-grid">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Rare Collection Section -->
+                <div class="rare-collection-section">
+                    <h3>Rare Balloon Collection</h3>
+                    <div class="rare-grid" id="rare-stats-grid">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weekly Challenges Screen -->
+        <div id="weekly-screen" class="screen hidden">
+            <div class="screen-header">
+                <h2 class="bubbly-text">📆 Weekly Challenges</h2>
+                <button id="weekly-back-button" class="bubbly-button secondary-btn">⬅️ Back</button>
+            </div>
+            <div id="weekly-streak-display" class="streak-badge">🔥 Weekly Streak: <span id="weekly-streak-count">0</span></div>
+            <div id="weekly-timer">Resets in: <span id="weekly-time-remaining">6d 23h</span></div>
+            <div id="weekly-challenges-list"></div>
+        </div>
+
+        <!-- Collection Album Screen -->
+        <div id="album-screen" class="screen hidden">
+            <div class="screen-header">
+                <h2 class="bubbly-text">📖 Collection Album</h2>
+                <button id="album-back-button" class="bubbly-button secondary-btn">⬅️ Back</button>
+            </div>
+            <div class="album-container">
+                <div class="album-category">
+                    <h3>🎈 Normal Balloons</h3>
+                    <div class="album-progress-bar">
+                        <div class="album-progress-fill" id="normal-progress"></div>
+                    </div>
+                    <div class="album-stats">
+                        <span id="normal-count">0</span> popped
+                        <span class="album-milestone">Next: <span id="normal-next">100</span> (+<span id="normal-reward">25</span>🪙)</span>
+                    </div>
+                </div>
+                <div class="album-category">
+                    <h3>✨ Special Balloons</h3>
+                    <div class="album-progress-bar">
+                        <div class="album-progress-fill" id="special-progress"></div>
+                    </div>
+                    <div class="album-stats">
+                        <span id="special-count">0</span> popped
+                        <span class="album-milestone">Next: <span id="special-next">50</span> (+<span id="special-reward">50</span>🪙)</span>
+                    </div>
+                </div>
+                <div class="album-category">
+                    <h3>🌈 Rare Balloons</h3>
+                    <div class="album-progress-bar">
+                        <div class="album-progress-fill" id="rare-progress"></div>
+                    </div>
+                    <div class="album-stats">
+                        <span id="rare-count">0</span> popped
+                        <span class="album-milestone">Next: <span id="rare-next">5</span> (+<span id="rare-reward">100</span>🪙)</span>
+                    </div>
+                </div>
+                <div class="album-category">
+                    <h3>👹 Boss Balloons</h3>
+                    <div class="album-progress-bar">
+                        <div class="album-progress-fill" id="boss-progress"></div>
+                    </div>
+                    <div class="album-stats">
+                        <span id="boss-count">0</span> defeated
+                        <span class="album-milestone">Next: <span id="boss-next">1</span> (+<span id="boss-reward">100</span>🪙)</span>
+                    </div>
+                </div>
+                
+                <!-- Rare Gallery -->
+                <div class="rare-gallery">
+                    <h3>🏆 Discovered Rares</h3>
+                    <div id="rare-gallery-grid">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prestige Screen -->
+        <div id="prestige-screen" class="screen hidden">
+            <div class="screen-header">
+                <h2 class="bubbly-text">⭐ Prestige</h2>
+                <button id="prestige-back-button" class="bubbly-button secondary-btn">⬅️ Back</button>
+            </div>
+            <div class="prestige-container">
+                <div class="prestige-current">
+                    <div class="prestige-level-display">
+                        <span class="prestige-star">⭐</span>
+                        <span id="current-prestige-level">0</span>
+                    </div>
+                    <div class="prestige-multiplier">
+                        Current Bonus: <span id="current-multiplier">1.0</span>x
+                    </div>
+                </div>
+                
+                <div class="prestige-progress">
+                    <h3>Progress to Next Prestige</h3>
+                    <div class="prestige-bar">
+                        <div class="prestige-bar-fill" id="prestige-progress-fill"></div>
+                    </div>
+                    <div class="prestige-stats">
+                        <span id="lifetime-stars">0</span> / <span id="prestige-requirement">5000</span> ⭐
+                    </div>
+                </div>
+                
+                <div class="prestige-rewards">
+                    <h3>Next Prestige Rewards</h3>
+                    <div id="prestige-reward-preview">
+                        <span>💎 <span id="prestige-gems">5</span></span>
+                        <span>🪙 <span id="prestige-coins">1000</span></span>
+                        <span>📈 <span id="prestige-new-mult">1.1</span>x multiplier</span>
+                    </div>
+                </div>
+                
+                <button id="prestige-btn" class="bubbly-button primary-btn" disabled>
+                    ⭐ PRESTIGE NOW
+                </button>
+                <p class="prestige-warning">⚠️ Prestiging resets your stars and rank, but keeps lifetime stats!</p>
+            </div>
+        </div>
+
+        <!-- Pause Screen -->
+        <div id="pause-screen" class="screen hidden">
+            <h2 class="bubbly-text">⏸️ PAUSED</h2>
+            <div class="pause-score">Score: <span id="pause-score">0</span></div>
+            <button id="resume-button" class="bubbly-button primary-btn">▶ RESUME</button>
+            <button id="restart-from-pause-button" class="bubbly-button secondary-btn">↻ RESTART</button>
+            <button id="quit-button" class="bubbly-button secondary-btn">🏠 QUIT</button>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="gameover-screen" class="screen hidden">
+            <div class="screen-content">
+                <h2 id="gameover-title">Time's Up!</h2>
+                <div id="final-score-display">0</div>
+                <div id="high-score-badge" class="hidden">New Record! 🏆</div>
+                <div id="high-score-display">Best: 0</div>
+                
+                <!-- New stats row -->
+                <div id="game-stats-row">
+                    <span>🎈 <span id="game-pops">0</span></span>
+                    <span>🔥 <span id="game-combo">0</span>x</span>
+                    <span>👹 <span id="game-bosses">0</span></span>
+                </div>
+                
+                <div id="rewards-earned">
+                    <span>⭐ <span id="stars-earned">0</span></span>
+                    <span>🪙 <span id="coins-earned">0</span></span>
+                </div>
+
+                <!-- Rank up notification -->
+                <div id="rank-up-notification" class="hidden">
+                    <span id="new-rank-emoji">🏅</span>
+                    Rank Up! <span id="new-rank-name">Champion</span>
+                </div>
+
+                <div id="initials-entry" class="hidden">
+                    <p>Enter Initials:</p>
+                    <div id="initials-input-container">
+                        <input type="text" maxlength="1" class="initial-input">
+                        <input type="text" maxlength="1" class="initial-input">
+                        <input type="text" maxlength="1" class="initial-input">
+                    </div>
+                    <button id="submit-score-button" class="bubbly-button primary-btn">Submit</button>
+                </div>
+
+                <div id="gameover-buttons">
+                    <button id="restart-button" class="bubbly-button primary-btn">Play Again</button>
+                    <button id="home-button" class="bubbly-button secondary-btn">Home</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shop Screen -->
+        <div id="shop-screen" class="screen hidden">
+            <h2 class="bubbly-text">🛒 Shop</h2>
+            <div id="shop-currency">
+                <span id="shop-coins">🪙 <span id="shop-coins-value">0</span></span>
+                <span id="shop-gems">💎 <span id="shop-gems-value">0</span></span>
+            </div>
+            <div id="shop-tabs">
+                <button class="tab-btn active" data-tab="themes">Themes</button>
+                <button class="tab-btn" data-tab="balloons">Balloons</button>
+                <button class="tab-btn" data-tab="sounds">Sounds</button>
+                <button class="tab-btn" data-tab="trails">Trails</button>
+                <button class="tab-btn" data-tab="powerups">Power-ups</button>
+            </div>
+            <div id="shop-grid"></div>
+            <button id="shop-back-button" class="bubbly-button secondary-btn">← BACK</button>
+        </div>
+
+        <!-- Collection Screen -->
+        <div id="collection-screen" class="screen hidden">
+            <h2 class="bubbly-text">🎨 Collection</h2>
+            <div id="collection-tabs">
+                <button class="tab-btn active" data-tab="themes">Themes</button>
+                <button class="tab-btn" data-tab="balloons">Balloons</button>
+                <button class="tab-btn" data-tab="sounds">Sounds</button>
+                <button class="tab-btn" data-tab="trails">Trails</button>
+            </div>
+            <div id="collection-grid"></div>
+            <button id="collection-back-button" class="bubbly-button secondary-btn">← BACK</button>
+        </div>
+
+        <!-- Leaderboard Screen -->
+        <div id="leaderboard-screen" class="screen hidden">
+            <h2 class="bubbly-text">📊 Leaderboard</h2>
+            <div id="leaderboard-tabs" class="tabs-container">
+                <button class="tab-btn active" data-tab="local">Local</button>
+                <button class="tab-btn" data-tab="global">Global</button>
+            </div>
+            <div id="leaderboard-list"></div>
+            <button id="leaderboard-back-button" class="bubbly-button secondary-btn">← BACK</button>
+        </div>
+
+        <!-- Challenges Screen -->
+        <div id="challenges-screen" class="screen hidden">
+            <h2 class="bubbly-text">📋 Daily Challenges</h2>
+            <div id="streak-display" class="streak-badge">🔥 Streak: <span id="streak-count">0</span> days</div>
+            <div id="challenges-list"></div>
+            <button id="challenges-back-button" class="bubbly-button secondary-btn">← BACK</button>
+        </div>
+
+        <!-- Achievements Screen -->
+        <div id="achievements-screen" class="screen hidden">
+            <h2 class="bubbly-text">🏆 Achievements</h2>
+            <div class="achievements-header">
+                <span id="achievement-points">🏅 <span id="achievement-points-value">0</span> points</span>
+                <span id="achievement-progress"><span id="achievements-unlocked">0</span>/<span id="achievements-total">0</span></span>
+            </div>
+            <div id="achievements-grid"></div>
+            <button id="achievements-back-button" class="bubbly-button secondary-btn">← BACK</button>
+        </div>
+
+        <!-- Mini-Game Screen -->
+        <div id="minigame-screen" class="screen hidden">
+            <h2 class="bubbly-text" id="minigame-title">⚡ BONUS ROUND!</h2>
+            <div id="minigame-timer">10</div>
+            <div id="minigame-score">0</div>
+            <p id="minigame-instruction">Pop as many as you can!</p>
+        </div>
+
+        <!-- Mega Pop Message -->
+        <div id="mega-pop-message" class="hidden bubbly-text">
+            FANTASTIC!
+        </div>
+
+        <!-- Unlock Notification -->
+        <div id="unlock-notification" class="hidden">
+            <div class="unlock-content">
+                <span id="unlock-emoji">🎉</span>
+                <span id="unlock-text">New Unlock!</span>
+            </div>
+        </div>
+
+        <!-- Achievement Notification -->
+        <div id="achievement-notification" class="hidden">
+            <div class="achievement-popup">
+                <span id="achievement-popup-icon">🏆</span>
+                <div class="achievement-popup-text">
+                    <span id="achievement-popup-name">Achievement!</span>
+                    <span id="achievement-popup-reward">+0🪙</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reinforcement Messages -->
+        <div id="reinforcement-message" class="hidden bubbly-text"></div>
+
+        <!-- Boss Warning -->
+        <div id="boss-warning" class="hidden">
+            <span class="boss-warning-text">⚠️ BOSS INCOMING! ⚠️</span>
+        </div>
+
+        <!-- Mystery Effect Reveal -->
+        <div id="mystery-reveal" class="hidden">
+            <span id="mystery-effect-text">???</span>
+        </div>
+    </div>
+
+    <!-- External Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <!-- Game Scripts -->
+    <script src="src/Particle.js"></script>
+    <script src="src/Environment.js"></script>
+    <script src="src/CursorTrail.js"></script>
+
+    <!-- Firebase SDKs (Compat for easier integration) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <!-- App Scripts -->
+    <script src="src/firebase-config.js"></script>
+    <script src="src/Balloon.js"></script>
+    <script src="src/ProgressionManager.js"></script>
+    <script src="src/ThemeManager.js"></script>
+    <script src="src/FirebaseManager.js"></script>
+    <script src="src/Leaderboard.js"></script>
+    <script src="main.js"></script>
+</body>
+
+</html>

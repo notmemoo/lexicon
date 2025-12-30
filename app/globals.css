@@ -1,0 +1,231 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-serif: var(--font-lora);
+  --font-mono: var(--font-geist-mono);
+  
+  --radius-3xl: 1.5rem;
+  --radius-4xl: 2rem;
+  --radius-5xl: 3rem;
+  
+  /* Rich midnight palette */
+  --color-midnight-50: #f7f7f8;
+  --color-midnight-100: #eeeef0;
+  --color-midnight-200: #d9d9de;
+  --color-midnight-300: #b8b8c1;
+  --color-midnight-400: #91919f;
+  --color-midnight-500: #747484;
+  --color-midnight-600: #5e5e6c;
+  --color-midnight-700: #4d4d58;
+  --color-midnight-800: #42424a;
+  --color-midnight-900: #1a1a1f;
+  --color-midnight-950: #0d0d10;
+  
+  /* Warm gold accent */
+  --color-gold-50: #fefbec;
+  --color-gold-100: #fcf4c9;
+  --color-gold-200: #f9e88e;
+  --color-gold-300: #f5d654;
+  --color-gold-400: #f2c428;
+  --color-gold-500: #e8a90f;
+  --color-gold-600: #cc830a;
+  --color-gold-700: #a85e0c;
+  --color-gold-800: #8a4a10;
+  --color-gold-900: #733d12;
+  --color-gold-950: #431f06;
+}
+
+:root {
+  --background: #0d0d10;
+  --foreground: #f7f7f8;
+  --accent: #f2c428;
+  --accent-dim: #a85e0c;
+  --card-bg: #1a1a1f;
+  --card-border: #2a2a32;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, .font-serif {
+  font-family: var(--font-serif), Georgia, serif;
+}
+
+/* Animated background pattern */
+.bg-pattern {
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(242, 196, 40, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(168, 94, 12, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(242, 196, 40, 0.02) 0%, transparent 30%);
+}
+
+/* Card styles */
+.vocab-card {
+  background: linear-gradient(145deg, #1e1e24 0%, #16161a 100%);
+  border: 1px solid rgba(242, 196, 40, 0.1);
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.4),
+    0 2px 4px -2px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.vocab-card:hover {
+  border-color: rgba(242, 196, 40, 0.2);
+  box-shadow: 
+    0 20px 40px -10px rgba(0, 0, 0, 0.5),
+    0 10px 20px -5px rgba(0, 0, 0, 0.4),
+    0 0 60px -20px rgba(242, 196, 40, 0.15);
+}
+
+/* Gold text gradient */
+.text-gold-gradient {
+  background: linear-gradient(135deg, #f5d654 0%, #f2c428 50%, #cc830a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Button styles */
+.nav-button {
+  background: linear-gradient(145deg, #1e1e24 0%, #16161a 100%);
+  border: 1px solid rgba(242, 196, 40, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-button:hover {
+  background: linear-gradient(145deg, #252530 0%, #1a1a20 100%);
+  border-color: rgba(242, 196, 40, 0.4);
+  box-shadow: 0 0 20px rgba(242, 196, 40, 0.1);
+  transform: translateY(-2px);
+}
+
+.nav-button:active {
+  transform: translateY(0);
+}
+
+.nav-button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Progress bar */
+.progress-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  background: linear-gradient(90deg, #a85e0c 0%, #f2c428 100%);
+  border-radius: 999px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Word animation */
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeSlideOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+.word-enter {
+  animation: fadeSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.word-exit {
+  animation: fadeSlideOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Pronunciation badge */
+.pronunciation-badge {
+  background: rgba(242, 196, 40, 0.08);
+  border: 1px solid rgba(242, 196, 40, 0.2);
+  color: #f5d654;
+}
+
+/* Part of speech tag */
+.pos-tag {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Example sentence */
+.example-text {
+  color: rgba(255, 255, 255, 0.7);
+  font-style: italic;
+  border-left: 2px solid rgba(242, 196, 40, 0.3);
+  padding-left: 1rem;
+}
+
+/* Keyboard hint */
+.kbd {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Decorative elements */
+.ornament {
+  color: rgba(242, 196, 40, 0.3);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(242, 196, 40, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(242, 196, 40, 0.3);
+}
+
+/* Selection */
+::selection {
+  background: rgba(242, 196, 40, 0.3);
+  color: #fff;
+}
