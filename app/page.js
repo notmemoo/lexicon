@@ -146,9 +146,28 @@ export default function VocabularyApp() {
   const [direction, setDirection] = useState("next");
   const [favorites, setFavorites] = useState([]);
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
 
   const currentWord = VOCABULARY[currentIndex];
   const progress = ((currentIndex + 1) / VOCABULARY.length) * 100;
+
+  // Text-to-speech function
+  const speakWord = useCallback(() => {
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+    
+    // Cancel any ongoing speech
+    window.speechSynthesis.cancel();
+    
+    const utterance = new SpeechSynthesisUtterance(currentWord.word);
+    utterance.rate = 0.8; // Slightly slower for clarity
+    utterance.pitch = 1;
+    
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+    
+    window.speechSynthesis.speak(utterance);
+  }, [currentWord.word]);
 
   const navigateWord = useCallback((dir) => {
     if (isTransitioning) return;
@@ -195,6 +214,8 @@ export default function VocabularyApp() {
         navigateWord("prev");
       } else if (e.key === "f") {
         toggleFavorite();
+      } else if (e.key === "s") {
+        speakWord();
       } else if (e.key === "?") {
         setShowShortcuts((prev) => !prev);
       }
@@ -202,7 +223,7 @@ export default function VocabularyApp() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [navigateWord]);
+  }, [navigateWord, speakWord]);
 
   // Random word on first load (simulating "word of the day")
   useEffect(() => {
@@ -275,9 +296,16 @@ export default function VocabularyApp() {
                 {currentWord.word}
               </h2>
               <div className="flex flex-wrap items-center gap-3">
-                <span className="pronunciation-badge px-3 py-1 rounded-full text-sm font-mono">
+                <button
+                  onClick={speakWord}
+                  className={`pronunciation-badge px-3 py-1 rounded-full text-sm font-mono flex items-center gap-2 hover:bg-gold-400/20 transition-all cursor-pointer ${
+                    isSpeaking ? "animate-pulse ring-2 ring-gold-400/50" : ""
+                  }`}
+                  title="Click to hear pronunciation (or press S)"
+                >
+                  <span className="text-base">🔊</span>
                   {currentWord.pronunciation}
-                </span>
+                </button>
                 <span className="pos-tag px-3 py-1 rounded-full">
                   {currentWord.partOfSpeech}
                 </span>
@@ -390,6 +418,10 @@ export default function VocabularyApp() {
                   <span className="text-midnight-500">or</span>
                   <kbd className="kbd">H</kbd>
                 </div>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-midnight-200">Hear pronunciation</span>
+                <kbd className="kbd">S</kbd>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-midnight-200">Toggle favorite</span>
