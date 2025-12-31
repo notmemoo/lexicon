@@ -192,7 +192,7 @@ export default function ServicesPage() {
               </Button>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
