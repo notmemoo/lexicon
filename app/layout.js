@@ -20,6 +20,20 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "Lexicon | Learn a New Word Every Day",
   description: "Expand your vocabulary one beautiful word at a time. Discover rare and wonderful words with elegant definitions and memorable examples.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Lexicon",
+  },
+};
+
+export const viewport = {
+  themeColor: "#f2c428",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({ children }) {
